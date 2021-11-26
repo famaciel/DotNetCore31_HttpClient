@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -49,27 +50,84 @@ namespace HttpClient.Api.Controllers
 
         // GET api/<BasicController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<AlbumModel>> Get(int id)
         {
-            return "value";
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://jsonplaceholder.typicode.com/albums/{id}");
+
+            var client = _clientFactory.CreateClient();
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<AlbumModel>(responseStream);
+            }
+            else
+            {
+                return NotFound();
+            }
+
         }
 
         // POST api/<BasicController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult> Post([FromBody] AlbumModel value)
         {
+            var albumContent = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json");
+
+            using var response = await _clientFactory.CreateClient().PostAsync("https://jsonplaceholder.typicode.com/albums", albumContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var result = await JsonSerializer.DeserializeAsync<AlbumModel>(responseStream);
+                return Ok (result);
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
         // PUT api/<BasicController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult> Put(int id, [FromBody] AlbumModel value)
         {
+            var albumContent = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json");
+
+            using var response = await _clientFactory.CreateClient().PutAsync($"https://jsonplaceholder.typicode.com/albums/{id}", albumContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var result = await JsonSerializer.DeserializeAsync<AlbumModel>(responseStream);
+                return Ok(result);
+            }
+            else
+            {
+                return new StatusCodeResult((int)response.StatusCode);
+            }
         }
 
         // DELETE api/<BasicController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"https://jsonplaceholder.typicode.com/albums/{id}");
+
+            var client = _clientFactory.CreateClient();
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok();
+            }
+            else
+            {
+                return new StatusCodeResult((int)response.StatusCode);
+            }
         }
     }
 }
