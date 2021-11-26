@@ -28,9 +28,9 @@ namespace HttpClient.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get(int id)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://jsonplaceholder.typicode.com/albums/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"albums/{id}");
 
-            var client = _clientFactory.CreateClient();
+            var client = _clientFactory.CreateClient("jsonplaceholder");
 
             var response = await client.SendAsync(request);
 
@@ -60,7 +60,7 @@ namespace HttpClient.Api.Controllers
 
             var albumContent = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json");
 
-            using var response = await _clientFactory.CreateClient().PostAsync("https://jsonplaceholder.typicode.com/albums", albumContent);
+            using var response = await _clientFactory.CreateClient("jsonplaceholder").PostAsync("albums", albumContent);
 
             if (response.IsSuccessStatusCode)
             {

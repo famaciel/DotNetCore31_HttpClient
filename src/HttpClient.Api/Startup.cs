@@ -28,7 +28,19 @@ namespace HttpClient.Api
             services.AddControllers();
             
             // Registro do IHttpClientFactory
-            services.AddHttpClient();
+            //services.AddHttpClient();
+
+            services.AddHttpClient("github", c =>
+            {
+                c.BaseAddress = new Uri("https://api.github.com/");
+                c.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                c.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
+            });
+
+            services.AddHttpClient("jsonplaceholder", c =>
+            {
+                c.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
